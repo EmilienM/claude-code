@@ -8,7 +8,7 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 10  # greater than the number of commits you made
         token: ${{ secrets.GH_PAT }}
