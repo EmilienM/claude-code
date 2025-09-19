@@ -1,17 +1,36 @@
-name: Rebase Upstream
+name: Rebase on Upstream
+
 on:
+  workflow_dispatch:       # Allows manual trigger
   schedule:
-  - cron: "0 0 * * 0"
-  workflow_dispatch:
+    - cron: '0 0 * * *'    # Scheduled to run daily at midnight UTC
 
 jobs:
-  sync:
+  rebase:
     runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 10  # greater than the number of commits you made
-        token: ${{ secrets.GH_PAT }}
-        ref: main
-    - uses: imba-tjd/rebase-upstream-action@0c9717490522e3aaffb5f2d27f0b20383f0e393c # last commit on master seems broken
 
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        ref: main            # Replace with your default branch if different
+        fetch-depth: 0       # Fetch full git history for rebase
+        token: ${{ secrets.GH_PAT }}
+
+    - name: Set up Git user
+      run: |
+        git config user.name 'github-actions[bot]'
+        git config user.email 'github-actions[bot]@users.noreply.github.com'
+
+    - name: Add upstream remote
+      run: |
+        git remote add upstream https://github.com/ORIGINAL_OWNER/ORIGINAL_REPOSITORY.git
+        git fetch upstream
+
+    - name: Rebase on upstream/main
+      run: |
+        git rebase upstream/main
+
+    - name: Push changes
+      run: |
+        git push origin main --force-with-lease
